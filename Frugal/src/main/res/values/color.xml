@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="orange_primary">#FF8800</color>
+    <color name="orange_secondary">#FFBB33</color>
+    <color name="stream_header_amount_exceeded">#e50000</color>
+    <color name="stream_background">#666666</color>
+    <color name="actions_background">#cccccc</color>
+    <color name="entry_background">#e6e6e6</color>
+</resources>

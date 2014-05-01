@@ -1,0 +1,57 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/stream_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/stream_background"
+    tools:context="fullplate.frugal.activities.StreamActivity">
+
+    <LinearLayout
+        android:id="@+id/stream_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/stream_border"
+        android:paddingRight="@dimen/stream_border"
+        android:background="@color/actions_background">
+
+        <Button
+            android:id="@+id/stream_actions_add_single"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15sp"
+            style="?android:attr/buttonStyleSmall"
+            android:text="Add Single"/>
+
+        <Button
+            android:id="@+id/stream_actions_add_periodic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15sp"
+            style="?android:attr/buttonStyleSmall"
+            android:text="Add Recurring"
+            />
+
+        <Button
+            android:id="@+id/stream_actions_remove_last"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15sp"
+            style="?android:attr/buttonStyleSmall"
+            android:text="Undo"/>
+
+    </LinearLayout>
+
+    <ExpandableListView
+        android:id="@+id/stream_explistview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/stream_border"
+        android:paddingLeft="@dimen/stream_border"
+        android:paddingRight="@dimen/stream_border"/>
+
+</LinearLayout>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Frugal.iml" filepath="$PROJECT_DIR$/Frugal.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Frugal/Frugal-Frugal.iml" filepath="$PROJECT_DIR$/Frugal/Frugal-Frugal.iml" />
+    </modules>
+  </component>
+</project>
+

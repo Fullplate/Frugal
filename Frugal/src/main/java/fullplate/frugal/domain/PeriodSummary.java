@@ -1,7 +1,7 @@
 package fullplate.frugal.domain;
 
 public class PeriodSummary implements Comparable<PeriodSummary> {
-    private final Long startTimestamp; // todo: decide on long vs. Long
+    private final Long startTimestamp;
     private final Long endTimestamp;
     private int maximumAmount;
     private int currentAmount;
@@ -53,9 +53,8 @@ public class PeriodSummary implements Comparable<PeriodSummary> {
 
     @Override
     public int compareTo(PeriodSummary that) {
-        // todo: possibly use Comparator
         if (this.getStartTimestamp().equals(that.getStartTimestamp())) return 0;
 
-        return (this.getStartTimestamp() < that.getStartTimestamp()) ? 1 : -1;
+        return (this.getStartTimestamp() > that.getStartTimestamp()) ? -1 : 1;
     }
 }

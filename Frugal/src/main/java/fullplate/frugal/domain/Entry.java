@@ -1,6 +1,6 @@
 package fullplate.frugal.domain;
 
-public class Entry {
+abstract public class Entry implements Comparable<Entry>{
     private String description;
     private int amount;
     private final Long timestamp;
@@ -26,4 +26,7 @@ public class Entry {
     public void setAmount(int amount) {
         this.amount = amount;
     }
+
+    @Override
+    abstract public int compareTo(Entry that);
 }

@@ -8,11 +8,12 @@ import java.util.SortedMap;
 
 import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
-import fullplate.frugal.utilities.PeriodSummaryBuilder;
+import fullplate.frugal.domain.SingleEntry;
+import fullplate.frugal.services.PeriodSummaryService;
 
 // todo: this is probably failing because Calendar does not set time fields to 0
 
-public class PeriodSummaryBuilderTest extends TestCase {
+public class PeriodSummaryServiceTest extends TestCase {
 
     private ArrayList<Entry> entries;
     private ArrayList<PeriodSummary> summaries;
@@ -32,10 +33,10 @@ public class PeriodSummaryBuilderTest extends TestCase {
         day = 86400000L;
 
         for (int i = 0; i < 50; i++) {
-            entries.add(new Entry("Description "+Integer.toString(i), i, start+(i*day)));
+            entries.add(new SingleEntry("Description "+Integer.toString(i), i, start+(i*day)));
         }
 
-        PeriodSummaryBuilder summaryBuilder = new PeriodSummaryBuilder(entries);
+        PeriodSummaryService summaryBuilder = null; //new PeriodSummaryService(entries);
         summaries = summaryBuilder.getSummaries();
         summaryMap = summaryBuilder.getSummaryMap();
     }

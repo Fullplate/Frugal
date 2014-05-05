@@ -5,12 +5,15 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.TypedValue;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -19,16 +22,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.SortedMap;
 
 import fullplate.frugal.R;
 import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
-import fullplate.frugal.utilities.PeriodSummaryBuilder;
+import fullplate.frugal.domain.PeriodicEntry;
+import fullplate.frugal.domain.SingleEntry;
+import fullplate.frugal.services.CalendarPeriod;
+import fullplate.frugal.services.PeriodSummaryService;
 import fullplate.frugal.utilities.PixelUtils;
 import fullplate.frugal.view.ExpandableStreamAdapter;
 
@@ -41,18 +49,21 @@ TODO
 - better styling for entries -- see also http://stackoverflow.com/questions/5132699/android-how-to-change-the-position-of-expandablelistview-indicator
 - header remains at top of screen and contents scroll (might require different listview)
 - persisting data using sharedpreferences or SQLite (ideal). Entries at first then possibly PeriodSummaries.
-- preferences & statistics screen...
+- statistics screen
 - icon click for back won't work on 4.0.3
+- 'set target' action on headers
+- clear data in overflow actionbar
 
-thurs:
-- description entry box
-- require both an amount and a description to click ok
-- suggestions for descriptions (previous input) would be ideal
+fri - Preferences
+- get preferences from SharedPreferences and use as args to PeriodSummaryService
+- add handling for the default of no targets
+- add 'set target' action on headers
+- polish header/entry styling a bit
  */
 
 public class StreamActivity extends Activity {
 
-    private PeriodSummaryBuilder summaryBuilder;
+    private PeriodSummaryService summaryService;
 
     private static ArrayList<Entry> generateTestEntries() {
         long start = 1388534400L * 1000;
@@ -61,15 +72,42 @@ public class StreamActivity extends Activity {
         ArrayList<Entry> entries = new ArrayList<>();
 
         for (int i = 0; i < 200; i++) {
-            entries.add(new Entry("Description "+Integer.toString(i), i, start+(i*day)));
+            entries.add(new SingleEntry("Description "+Integer.toString(i), i, start+(i*day)));
         }
+
+        entries.add(new PeriodicEntry("P1", 10));
+        entries.add(new PeriodicEntry("P2", 500));
 
         return entries;
     }
 
+    private static long generateTestStartTime() {
+        return 1388534400L * 1000; // 1st jan '14, midnight
+    }
+
+    public void showSummaryMenu(final View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.stream_header_menu_settarget:
+                        createSetTargetDialog();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        popup.inflate(R.layout.stream_summary_menu);
+        popup.show();
+    }
+
     private void updateStreamView() {
-        ArrayList<PeriodSummary> summaries = summaryBuilder.getSummaries();
-        SortedMap<PeriodSummary, ArrayList<Entry>> summaryMap = summaryBuilder.getSummaryMap();
+        ArrayList<PeriodSummary> summaries = summaryService.getSummaries();
+        SortedMap<PeriodSummary, ArrayList<Entry>> summaryMap = summaryService.getSummaryMap();
 
         ExpandableListView stream = (ExpandableListView) findViewById(R.id.stream_explistview);
         ExpandableStreamAdapter streamAdapter = new ExpandableStreamAdapter(this, R.layout.stream_entry, R.layout.stream_summary, summaries, summaryMap);
@@ -78,20 +116,8 @@ public class StreamActivity extends Activity {
         stream.expandGroup(0);
     }
 
-    private void addSingleEntry(String description, int amount) {
-        Entry e = new Entry(description, amount, System.currentTimeMillis());
-
-        summaryBuilder.addSingleEntry(e);
-
-        updateStreamView();
-    }
-
-    private void addPeriodEntry() {
-        // todo
-    }
-
     private void removeLastEntry() {
-        summaryBuilder.removeLastEntry();
+        summaryService.removeLastEntry();
 
         updateStreamView();
     }
@@ -102,9 +128,13 @@ public class StreamActivity extends Activity {
         label.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.entry_input_font_size));
         label.setPadding(PixelUtils.dpToPixels(this, 10), PixelUtils.dpToPixels(this, 5), 0, PixelUtils.dpToPixels(this, 5));
         label.setTextColor(getResources().getColor(R.color.orange_primary));
-        label.setBackgroundColor(getResources().getColor(R.color.entry_background));
+        label.setBackgroundColor(getResources().getColor(R.color.grey_light2));
 
         return label;
+    }
+
+    private void createSetTargetDialog() {
+        System.out.println("HELLO!");
     }
 
     private void createInputDialog(final String whichAction) {
@@ -146,10 +176,12 @@ public class StreamActivity extends Activity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 try {
                     if (whichAction.equals("single")) {
-                        StreamActivity.this.addSingleEntry(descInput.getText().toString(), Integer.parseInt(amountInput.getText().toString()));
+                        Entry e = new SingleEntry(descInput.getText().toString(), Integer.parseInt(amountInput.getText().toString()), System.currentTimeMillis());
+                        StreamActivity.this.summaryService.addEntry(e);
                     }
                     else if (whichAction.equals("periodic")) {
-                        // todo
+                        Entry e = new PeriodicEntry(descInput.getText().toString(), Integer.parseInt(amountInput.getText().toString()));
+                        StreamActivity.this.summaryService.addEntry(e);
                     }
                 }
                 catch (NumberFormatException e) {
@@ -207,13 +239,41 @@ public class StreamActivity extends Activity {
         });
     }
 
+    private void updatePeriodSummaryService() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        String periodPref = sharedPref.getString("periodPref", "");
+        CalendarPeriod calendarPeriod;
+
+        switch (Integer.parseInt(periodPref)) {
+            case 0:
+                calendarPeriod = new CalendarPeriod(Calendar.DAY_OF_YEAR, 7);
+                break;
+            case 1:
+                calendarPeriod = new CalendarPeriod(Calendar.DAY_OF_YEAR, 14);
+                break;
+            case 2:
+                calendarPeriod = new CalendarPeriod(Calendar.MONTH, 1);
+                break;
+            default:
+                calendarPeriod = new CalendarPeriod(Calendar.DAY_OF_YEAR, 7);
+        }
+
+        int defaultAmountPref = Integer.parseInt(sharedPref.getString("defaultAmountPref", "0")); // check out nicer way of doing this
+
+        summaryService = new PeriodSummaryService(generateTestEntries(), generateTestStartTime(), calendarPeriod, defaultAmountPref);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_stream);
 
-        summaryBuilder = new PeriodSummaryBuilder(generateTestEntries());
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+        updatePeriodSummaryService();
+
         updateStreamView();
 
         setClickListeners();
@@ -229,7 +289,7 @@ public class StreamActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_statistics) {
-            // todo: send PeriodSummaryBuilder through, or make it globally accessible.
+            // todo: send PeriodSummaryService through, or make it globally accessible.
             startActivity(new Intent(this, StatisticsActivity.class));
             return true;
         }

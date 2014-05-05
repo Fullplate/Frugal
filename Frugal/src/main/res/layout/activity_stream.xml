@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/stream_background"
+    android:background="@color/grey_medium"
     tools:context="fullplate.frugal.activities.StreamActivity">
 
     <LinearLayout
@@ -14,7 +14,7 @@
         android:orientation="horizontal"
         android:paddingLeft="@dimen/stream_border"
         android:paddingRight="@dimen/stream_border"
-        android:background="@color/actions_background">
+        android:background="@color/grey_light">
 
         <Button
             android:id="@+id/stream_actions_add_single"

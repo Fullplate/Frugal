@@ -27,7 +27,7 @@
             <!-- Parent activity meta-data to support 4.0 -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.StreamActivity" />
+                android:value=".view.StreamActivity" />
         </activity>
 
         <activity
@@ -38,7 +38,7 @@
             <!-- Parent activity meta-data to support 4.0 -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.StreamActivity" />
+                android:value=".view.StreamActivity" />
         </activity>
 
     </application>

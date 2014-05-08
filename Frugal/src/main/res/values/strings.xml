@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Frugal</string>
+    <string name="app_name">Basic Budget</string>
     <string name="action_stream">Stream</string>
     <string name="action_statistics">Statistics</string>
     <string name="action_settings">Settings</string>

@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,25 +26,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.reflect.Field;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.SortedMap;
 
 import fullplate.frugal.R;
-import fullplate.frugal.database.EntriesTableHandler;
 import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
 import fullplate.frugal.domain.PeriodicEntry;
 import fullplate.frugal.domain.SingleEntry;
-import fullplate.frugal.services.CalendarPeriod;
 import fullplate.frugal.services.PeriodSummaryService;
 import fullplate.frugal.utilities.PixelUtils;
 
 /*
 TODO
 - view caching for expandablelistview
-- persisting data using sharedpreferences or SQLite (ideal). Entries at first then possibly PeriodSummaries.
 - statistics screen
 
 Dialogs:
@@ -59,34 +53,9 @@ Misc:
 - tidy font sizes/dimens/hardcoded strings etc.
 - unify the repetitive stuff?
 - different font types?
-
-- since we're only persisting entries, may need to remove the ability to individually set targets
-- add start time to some sort of data store
  */
 
 public class StreamActivity extends Activity {
-
-    private static ArrayList<Entry> generateTestEntries() {
-        long day = 86400000;
-
-        ArrayList<Entry> entries = new ArrayList<>();
-
-        for (int i = 0; i < 40; i++) {
-            long time = generateTestStartTime()+(i*day);
-            if (time < System.currentTimeMillis()) {
-                entries.add(new SingleEntry(generateTestStartTime()+(i*day), i, "Description "+Integer.toString(i)));
-            }
-        }
-
-        entries.add(new PeriodicEntry(10, "P1"));
-        entries.add(new PeriodicEntry(500, "P2"));
-
-        return entries;
-    }
-
-    private static long generateTestStartTime() {
-        return 1396310400000L; // 1st apr '14, midnight
-    }
 
     public static void updateStreamView(Activity activity) {
         ArrayList<PeriodSummary> summaries = PeriodSummaryService.getService().getSummaries();
@@ -99,13 +68,13 @@ public class StreamActivity extends Activity {
         stream.expandGroup(0);
     }
 
-    private TextView getInputDialogLabel(String text) {
-        TextView label = new TextView(this);
+    public static TextView getInputDialogLabel(Context context, String text) {
+        TextView label = new TextView(context);
         label.setText(text);
-        label.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.entry_input_font_size));
-        label.setPadding(PixelUtils.dpToPixels(this, 10), PixelUtils.dpToPixels(this, 10), 0, PixelUtils.dpToPixels(this, 10));
-        label.setTextColor(getResources().getColor(R.color.orange_primary));
-        label.setBackgroundColor(getResources().getColor(R.color.grey_light2));
+        label.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources().getDimension(R.dimen.dialog_label_fontsize));
+        label.setPadding(PixelUtils.dpToPixels(context, 10), PixelUtils.dpToPixels(context, 10), 0, PixelUtils.dpToPixels(context, 10));
+        label.setTextColor(context.getResources().getColor(R.color.orange_primary));
+        label.setBackgroundColor(context.getResources().getColor(R.color.grey_light2));
 
         return label;
     }
@@ -116,7 +85,7 @@ public class StreamActivity extends Activity {
         LinearLayout holder = new LinearLayout(this);
         holder.setOrientation(LinearLayout.VERTICAL);
 
-        TextView label = getInputDialogLabel("Are you sure?");
+        TextView label = getInputDialogLabel(this, "Are you sure?");
         holder.addView(label);
 
         adb.setView(holder);
@@ -145,8 +114,8 @@ public class StreamActivity extends Activity {
         LinearLayout holder = new LinearLayout(this);
         holder.setOrientation(LinearLayout.VERTICAL);
 
-        TextView descLabel = getInputDialogLabel("Description");
-        TextView amountLabel = getInputDialogLabel("Amount");
+        TextView descLabel = getInputDialogLabel(this, "Description");
+        TextView amountLabel = getInputDialogLabel(this, "Amount");
 
         final EditText descInput = new EditText(this);
         descInput.setInputType(InputType.TYPE_CLASS_TEXT);

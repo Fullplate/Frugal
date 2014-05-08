@@ -8,12 +8,10 @@
         android:showAsAction="always"/>
     
     <item android:id="@+id/action_preferences"
-        android:icon="@drawable/ic_action_preferences"
         android:title="@string/action_settings"
         android:showAsAction="never"/>
 
     <item android:id="@+id/action_clear_data"
-        android:icon="@drawable/ic_action_discard"
         android:title="@string/action_clear_data"
         android:showAsAction="never"/>
 

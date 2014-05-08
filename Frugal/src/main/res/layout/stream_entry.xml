@@ -14,7 +14,7 @@
         android:layout_centerVertical="true"
         android:gravity="center_vertical"
         android:paddingLeft="10dp"
-        android:textSize="12sp"/>
+        android:textSize="@dimen/stream_fontsize_small"/>
 
     <TextView android:id="@+id/stream_entry_amount"
         android:layout_width="wrap_content"
@@ -22,7 +22,7 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:paddingLeft="85dp"
-        android:textSize="14sp"
+        android:textSize="@dimen/stream_fontsize_normal"
         android:textStyle="bold"/>
 
     <TextView android:id="@+id/stream_entry_description"
@@ -31,7 +31,7 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:paddingLeft="140dp"
-        android:textSize="14sp"
+        android:textSize="@dimen/stream_fontsize_normal"
         android:textStyle="italic"/>
 
     <ImageView android:id="@+id/stream_entry_action_delete"

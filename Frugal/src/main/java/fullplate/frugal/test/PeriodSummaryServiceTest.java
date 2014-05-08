@@ -13,6 +13,7 @@ import fullplate.frugal.services.PeriodSummaryService;
 
 // todo: this is probably failing because Calendar does not set time fields to 0
 
+@Deprecated
 public class PeriodSummaryServiceTest extends TestCase {
 
     private ArrayList<Entry> entries;
@@ -59,7 +60,6 @@ public class PeriodSummaryServiceTest extends TestCase {
         assertNotNull(actualSummary);
     }
 
-
     public void testFirstPeriodSummaryCorrectAmount() {
         PeriodSummary expectedSummary = new PeriodSummary(start, start+(day*7), 28);
         PeriodSummary actualSummary = null;
@@ -73,9 +73,5 @@ public class PeriodSummaryServiceTest extends TestCase {
 
         assertEquals(actualSummary.getCurrentAmount(), expectedSummary.getCurrentAmount());
     }
-
-//    public void testSecondPeriodSummaryCorrectAmount() {
-//
-//    }
 
 }

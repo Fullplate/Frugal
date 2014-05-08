@@ -9,12 +9,12 @@ import java.util.SortedMap;
 import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
 import fullplate.frugal.domain.SingleEntry;
-import fullplate.frugal.services.PeriodSummaryService;
+import fullplate.frugal.services.DomainService;
 
 // todo: this is probably failing because Calendar does not set time fields to 0
 
 @Deprecated
-public class PeriodSummaryServiceTest extends TestCase {
+public class DomainServiceTest extends TestCase {
 
     private ArrayList<Entry> entries;
     private ArrayList<PeriodSummary> summaries;
@@ -37,7 +37,7 @@ public class PeriodSummaryServiceTest extends TestCase {
             entries.add(new SingleEntry(start+(i*day), i, "Description "+Integer.toString(i)));
         }
 
-        PeriodSummaryService summaryBuilder = null; //new PeriodSummaryService(entries);
+        DomainService summaryBuilder = null; //new DomainService(entries);
         summaries = summaryBuilder.getSummaries();
         summaryMap = summaryBuilder.getSummaryMap();
     }

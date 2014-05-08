@@ -34,32 +34,24 @@ import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
 import fullplate.frugal.domain.PeriodicEntry;
 import fullplate.frugal.domain.SingleEntry;
-import fullplate.frugal.services.PeriodSummaryService;
+import fullplate.frugal.services.DomainService;
 import fullplate.frugal.utilities.PixelUtils;
 
 /*
 TODO
-- view caching for expandablelistview
 - statistics screen
-
-Dialogs:
-- a click on the transparent part closes the dialog but not the keyboard (http://stackoverflow.com/questions/4165414/how-to-hide-soft-keyboard-on-android-after-clicking-outside-edittext)
-- custom keyboard for currency input
+- view caching for expandablelistview
 - use AutoCompleteTextView with a dataadapter of previous descriptions
-- since this code is duplicated 4+ times we could wrap it in a class
-
-Misc:
-- tidy code
-- tidy font sizes/dimens/hardcoded strings etc.
-- unify the repetitive stuff?
-- different font types?
+- unify dialog code (possibly)
+- override styles for onclick highlights, preference dialogs etc.
+- ensure proguard is working (requires app signing first)
  */
 
 public class StreamActivity extends Activity {
 
     public static void updateStreamView(Activity activity) {
-        ArrayList<PeriodSummary> summaries = PeriodSummaryService.getService().getSummaries();
-        SortedMap<PeriodSummary, ArrayList<Entry>> summaryMap = PeriodSummaryService.getService().getSummaryMap();
+        ArrayList<PeriodSummary> summaries = DomainService.getService().getSummaries();
+        SortedMap<PeriodSummary, ArrayList<Entry>> summaryMap = DomainService.getService().getSummaryMap();
 
         ExpandableListView stream = (ExpandableListView) activity.findViewById(R.id.stream_explistview);
         ExpandableStreamAdapter streamAdapter = new ExpandableStreamAdapter(activity, R.layout.stream_entry, R.layout.stream_summary, summaries, summaryMap);
@@ -93,7 +85,7 @@ public class StreamActivity extends Activity {
         adb.setPositiveButton("Clear Data", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                PeriodSummaryService.getService().clearData();
+                DomainService.getService().clearData();
                 StreamActivity.updateStreamView(StreamActivity.this);
                 Toast.makeText(StreamActivity.this, "Data cleared!", Toast.LENGTH_SHORT).show();
             }
@@ -143,11 +135,11 @@ public class StreamActivity extends Activity {
                 try {
                     if (whichAction.equals("single")) {
                         Entry e = new SingleEntry(System.currentTimeMillis(), Integer.parseInt(amountInput.getText().toString()), descInput.getText().toString());
-                        PeriodSummaryService.getService().addEntry(e);
+                        DomainService.getService().addEntry(e);
                     }
                     else if (whichAction.equals("periodic")) {
                         Entry e = new PeriodicEntry(Integer.parseInt(amountInput.getText().toString()), descInput.getText().toString());
-                        PeriodSummaryService.getService().addEntry(e);
+                        DomainService.getService().addEntry(e);
                     }
 
                     updateStreamView(StreamActivity.this);
@@ -219,7 +211,7 @@ public class StreamActivity extends Activity {
         super.onResume();
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        PeriodSummaryService.getService().updatePreferences(sharedPref);
+        DomainService.getService().updatePreferences(sharedPref);
 
         updateStreamView(this);
     }
@@ -248,7 +240,8 @@ public class StreamActivity extends Activity {
         catch (Exception e) {
         }
 
-        PeriodSummaryService.startService(this);
+        // important - initialize the DomainService with entries from database and user preferences
+        DomainService.startService(this);
     }
 
     @Override

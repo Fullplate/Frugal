@@ -4,19 +4,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
-import android.text.InputFilter;
-import android.text.InputType;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -29,8 +22,7 @@ import java.util.SortedMap;
 import fullplate.frugal.R;
 import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
-import fullplate.frugal.services.PeriodSummaryService;
-import fullplate.frugal.utilities.PixelUtils;
+import fullplate.frugal.services.DomainService;
 
 public class ExpandableStreamAdapter extends BaseExpandableListAdapter {
 
@@ -71,7 +63,7 @@ public class ExpandableStreamAdapter extends BaseExpandableListAdapter {
         adb.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                PeriodSummaryService.getService().removeEntry(entry);
+                DomainService.getService().removeEntry(entry);
                 StreamActivity.updateStreamView((Activity) context);
                 Toast.makeText(context, "Entry deleted!", Toast.LENGTH_SHORT).show();
             }

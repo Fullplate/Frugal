@@ -16,11 +16,15 @@ import java.util.TreeMap;
 import fullplate.frugal.database.EntriesTableHandler;
 import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
-import fullplate.frugal.domain.SingleEntry;
 
-public class PeriodSummaryService {
+/*
+    This class provides an abstraction over the persistence layer.
+    It builds our domain objects into a structure suitable for the view layer, which includes
+    handling user preferences.
+ */
+public class DomainService {
 
-    private static PeriodSummaryService summaryService = null;
+    private static DomainService summaryService = null;
 
     // ideally this logic would be in getService, but passing Context each time isn't ideal
     // as such, this should be called once only before subsequent calls to getService()
@@ -31,7 +35,7 @@ public class PeriodSummaryService {
             entriesTableHandler.open();
         }
         catch (SQLException e) {
-            Log.e(PeriodSummaryService.class.getCanonicalName(), "Failed to open SQLite database.");
+            Log.e(DomainService.class.getCanonicalName(), "Failed to open SQLite database.");
         }
 
         ArrayList<Entry> entries = entriesTableHandler.getAllEntries();
@@ -42,13 +46,13 @@ public class PeriodSummaryService {
         CalendarPeriod period = readPeriodPref(sharedPref);
         int defaultAmount = readDefaultTargetPref(sharedPref);
 
-        summaryService = new PeriodSummaryService(entries, startTime, period, defaultAmount);
+        summaryService = new DomainService(entries, startTime, period, defaultAmount);
 
         summaryService.entriesTableHandler = entriesTableHandler;
         summaryService.sharedPref = sharedPref;
     }
 
-    public static PeriodSummaryService getService() {
+    public static DomainService getService() {
         return summaryService;
     }
 
@@ -110,7 +114,7 @@ public class PeriodSummaryService {
     private CalendarPeriod period;
     private int defaultTarget;
 
-    public PeriodSummaryService(ArrayList<Entry> entries, long startTime, CalendarPeriod period, int defaultTarget) {
+    public DomainService(ArrayList<Entry> entries, long startTime, CalendarPeriod period, int defaultTarget) {
         if (summaryService == null) {
             summaryService = this;
         }

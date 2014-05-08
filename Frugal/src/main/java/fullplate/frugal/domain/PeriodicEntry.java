@@ -3,7 +3,7 @@ package fullplate.frugal.domain;
 import java.util.Calendar;
 
 import fullplate.frugal.services.CalendarPeriod;
-import fullplate.frugal.services.PeriodSummaryService;
+import fullplate.frugal.services.DomainService;
 
 public class PeriodicEntry extends Entry {
 
@@ -13,7 +13,7 @@ public class PeriodicEntry extends Entry {
 
     @Override
     public String getTimestampString() {
-        CalendarPeriod period = PeriodSummaryService.getService().getPeriod();
+        CalendarPeriod period = DomainService.getService().getPeriod();
 
         switch (period.getField()) {
             case Calendar.DAY_OF_YEAR:

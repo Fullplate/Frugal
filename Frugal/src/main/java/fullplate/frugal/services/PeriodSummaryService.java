@@ -1,5 +1,11 @@
 package fullplate.frugal.services;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.util.Log;
+
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -7,19 +13,96 @@ import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import fullplate.frugal.database.EntriesTableHandler;
 import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
 import fullplate.frugal.domain.SingleEntry;
 
 public class PeriodSummaryService {
 
-    // todo: this class should probably be instantiated at static time from a database, and have a private constructor
-
     private static PeriodSummaryService summaryService = null;
-    public static PeriodSummaryService getService()
-    {
+
+    // ideally this logic would be in getService, but passing Context each time isn't ideal
+    // as such, this should be called once only before subsequent calls to getService()
+    public static void startService(Context context) {
+        EntriesTableHandler entriesTableHandler = new EntriesTableHandler(context);
+
+        try {
+            entriesTableHandler.open();
+        }
+        catch (SQLException e) {
+            Log.e(PeriodSummaryService.class.getCanonicalName(), "Failed to open SQLite database.");
+        }
+
+        ArrayList<Entry> entries = entriesTableHandler.getAllEntries();
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+
+        long startTime = readStartTimePref(sharedPref, false);
+        CalendarPeriod period = readPeriodPref(sharedPref);
+        int defaultAmount = readDefaultTargetPref(sharedPref);
+
+        summaryService = new PeriodSummaryService(entries, startTime, period, defaultAmount);
+
+        summaryService.entriesTableHandler = entriesTableHandler;
+        summaryService.sharedPref = sharedPref;
+    }
+
+    public static PeriodSummaryService getService() {
         return summaryService;
     }
+
+    private static CalendarPeriod readPeriodPref(SharedPreferences sharedPref) {
+        String periodPref = sharedPref.getString("periodPref", "");
+        CalendarPeriod calendarPeriod;
+
+        switch (Integer.parseInt(periodPref)) {
+            case 0:
+                calendarPeriod = new CalendarPeriod(Calendar.DAY_OF_YEAR, 7);
+                break;
+            case 1:
+                calendarPeriod = new CalendarPeriod(Calendar.DAY_OF_YEAR, 14);
+                break;
+            case 2:
+                calendarPeriod = new CalendarPeriod(Calendar.MONTH, 1);
+                break;
+            default:
+                calendarPeriod = new CalendarPeriod(Calendar.DAY_OF_YEAR, 7);
+        }
+
+        return calendarPeriod;
+    }
+
+    private static int readDefaultTargetPref(SharedPreferences sharedPref) {
+        // extract "default target amount" from preferences
+        int defaultAmountPref = Integer.parseInt(sharedPref.getString("defaultAmountPref", "-1"));
+
+        // if we are not using a default amount, have to manually set the amount to -1
+        boolean useDefaultAmount = sharedPref.getBoolean("useDefaultPref", false);
+        if (!useDefaultAmount) {
+            defaultAmountPref = -1;
+        }
+
+        return defaultAmountPref;
+    }
+
+    private static long readStartTimePref(SharedPreferences sharedPref, boolean reset) {
+        long startTime = sharedPref.getLong("startTimestamp", -1);
+
+        // first-time run or timestamp reset, so we record the current time as our start timestamp
+        if (startTime == -1 || reset) {
+            SharedPreferences.Editor editor = sharedPref.edit();
+            startTime = System.currentTimeMillis();
+            editor.putLong("startTimestamp", startTime);
+            editor.commit();
+        }
+
+        return startTime;
+    }
+
+
+    protected EntriesTableHandler entriesTableHandler;
+    protected SharedPreferences sharedPref;
 
     private SortedMap<PeriodSummary, ArrayList<Entry>> summaries;
     private ArrayList<Entry> entries;
@@ -75,25 +158,22 @@ public class PeriodSummaryService {
         }
     }
 
+    public void updatePreferences(SharedPreferences sharedPref) {
+        this.period = readPeriodPref(sharedPref);
+        this.defaultTarget = readDefaultTargetPref(sharedPref);
+    }
+
     public void addEntry(Entry e) {
-        entries.add(e);
+        entries.add(e);                     // update in-memory entries
+        entriesTableHandler.createEntry(e); // update entries table in database
+
         updateSummaries();
     }
 
     public void removeEntry(Entry entry) {
         for (int i = 0; i < entries.size(); i++) {
             if (entry.getTimestamp().equals(entries.get(i).getTimestamp())) {
-                entries.remove(i);
-                break;
-            }
-        }
-
-        updateSummaries();
-    }
-
-    public void removeLatestEntry() {
-        for (int i = 0; i < entries.size(); i++) {
-            if (entries.get(i) instanceof SingleEntry) {
+                entriesTableHandler.deleteEntry(entries.get(i));
                 entries.remove(i);
                 break;
             }
@@ -104,7 +184,11 @@ public class PeriodSummaryService {
 
     public void clearData() {
         entries = new ArrayList<>();
-        startTime = System.currentTimeMillis();
+        entriesTableHandler.wipeTable();
+
+        // reset start time and record it to preferences
+        startTime = readStartTimePref(sharedPref, true);
+
         updateSummaries();
     }
 
@@ -122,12 +206,10 @@ public class PeriodSummaryService {
         }
     }
 
-    // todo: write to database on update?
-    // we assume entries are ordered from oldest->newest
     public void updateSummaries() {
         summaries = new TreeMap<>();
 
-        Collections.sort(entries);
+        Collections.sort(entries); // entries are sorted from oldest -> newest
 
         buildSummariesSkeleton();
         fillSummaries();

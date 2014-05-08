@@ -4,8 +4,8 @@ import java.text.SimpleDateFormat;
 
 public class SingleEntry extends Entry {
 
-    public SingleEntry(String description, int amount, Long timestamp) {
-        super(description, amount, timestamp);
+    public SingleEntry(Long timestamp, int amount, String description) {
+        super(timestamp, amount, description);
     }
 
     @Override

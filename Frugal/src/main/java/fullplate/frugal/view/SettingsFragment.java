@@ -1,4 +1,4 @@
-package fullplate.frugal.activities;
+package fullplate.frugal.view;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;

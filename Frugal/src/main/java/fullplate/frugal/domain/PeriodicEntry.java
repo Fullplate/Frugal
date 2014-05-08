@@ -7,8 +7,8 @@ import fullplate.frugal.services.PeriodSummaryService;
 
 public class PeriodicEntry extends Entry {
 
-    public PeriodicEntry(String description, int amount) {
-        super(description, amount, -1L);
+    public PeriodicEntry(int amount, String description) {
+        super(-1L, amount, description);
     }
 
     @Override

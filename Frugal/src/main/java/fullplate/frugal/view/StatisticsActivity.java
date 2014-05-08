@@ -1,4 +1,4 @@
-package fullplate.frugal.activities;
+package fullplate.frugal.view;
 
 import android.app.Activity;
 import android.os.Bundle;

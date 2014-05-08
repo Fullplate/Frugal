@@ -1,4 +1,4 @@
-package fullplate.frugal.activities;
+package fullplate.frugal.view;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,7 +20,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
@@ -27,11 +27,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.SortedMap;
 
 import fullplate.frugal.R;
+import fullplate.frugal.database.EntriesTableHandler;
 import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
 import fullplate.frugal.domain.PeriodicEntry;
@@ -39,7 +41,6 @@ import fullplate.frugal.domain.SingleEntry;
 import fullplate.frugal.services.CalendarPeriod;
 import fullplate.frugal.services.PeriodSummaryService;
 import fullplate.frugal.utilities.PixelUtils;
-import fullplate.frugal.view.ExpandableStreamAdapter;
 
 /*
 TODO
@@ -60,6 +61,7 @@ Misc:
 - different font types?
 
 - since we're only persisting entries, may need to remove the ability to individually set targets
+- add start time to some sort of data store
  */
 
 public class StreamActivity extends Activity {
@@ -72,18 +74,18 @@ public class StreamActivity extends Activity {
         for (int i = 0; i < 40; i++) {
             long time = generateTestStartTime()+(i*day);
             if (time < System.currentTimeMillis()) {
-                entries.add(new SingleEntry("Description "+Integer.toString(i), i, generateTestStartTime()+(i*day)));
+                entries.add(new SingleEntry(generateTestStartTime()+(i*day), i, "Description "+Integer.toString(i)));
             }
         }
 
-        entries.add(new PeriodicEntry("P1", 10));
-        entries.add(new PeriodicEntry("P2", 500));
+        entries.add(new PeriodicEntry(10, "P1"));
+        entries.add(new PeriodicEntry(500, "P2"));
 
         return entries;
     }
 
     private static long generateTestStartTime() {
-        return 1396310400L * 1000; // 1st apr '14, midnight
+        return 1396310400000L; // 1st apr '14, midnight
     }
 
     public static void updateStreamView(Activity activity) {
@@ -171,11 +173,11 @@ public class StreamActivity extends Activity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 try {
                     if (whichAction.equals("single")) {
-                        Entry e = new SingleEntry(descInput.getText().toString(), Integer.parseInt(amountInput.getText().toString()), System.currentTimeMillis());
+                        Entry e = new SingleEntry(System.currentTimeMillis(), Integer.parseInt(amountInput.getText().toString()), descInput.getText().toString());
                         PeriodSummaryService.getService().addEntry(e);
                     }
                     else if (whichAction.equals("periodic")) {
-                        Entry e = new PeriodicEntry(descInput.getText().toString(), Integer.parseInt(amountInput.getText().toString()));
+                        Entry e = new PeriodicEntry(Integer.parseInt(amountInput.getText().toString()), descInput.getText().toString());
                         PeriodSummaryService.getService().addEntry(e);
                     }
 
@@ -243,55 +245,12 @@ public class StreamActivity extends Activity {
         addPeriodicButton.setOnTouchListener(buttonDimmer);
     }
 
-    private void updatePeriodSummaryService() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-
-        // extract CalendarPeriod from preferences
-        String periodPref = sharedPref.getString("periodPref", "");
-        CalendarPeriod calendarPeriod;
-
-        switch (Integer.parseInt(periodPref)) {
-            case 0:
-                calendarPeriod = new CalendarPeriod(Calendar.DAY_OF_YEAR, 7);
-                break;
-            case 1:
-                calendarPeriod = new CalendarPeriod(Calendar.DAY_OF_YEAR, 14);
-                break;
-            case 2:
-                calendarPeriod = new CalendarPeriod(Calendar.MONTH, 1);
-                break;
-            default:
-                calendarPeriod = new CalendarPeriod(Calendar.DAY_OF_YEAR, 7);
-        }
-
-        // extract "default target amount" from preferences
-        int defaultAmountPref = Integer.parseInt(sharedPref.getString("defaultAmountPref", "-1"));
-
-        // if we are not using a default amount, have to manually set the amount to -1
-        boolean useDefaultAmount = sharedPref.getBoolean("useDefaultPref", false);
-        if (!useDefaultAmount) {
-            defaultAmountPref = -1;
-        }
-
-        PeriodSummaryService service;
-
-        // todo: this is dodgy, but will do until we use a datastore to initialize the service
-        if (PeriodSummaryService.getService() == null) {
-            service = new PeriodSummaryService(generateTestEntries(), generateTestStartTime(), calendarPeriod, defaultAmountPref);
-        }
-        else {
-            service = PeriodSummaryService.getService();
-            service.setPeriod(calendarPeriod);
-            service.setDefaultTarget(defaultAmountPref);
-            service.updateSummaries();
-        }
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
 
-        updatePeriodSummaryService();
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        PeriodSummaryService.getService().updatePreferences(sharedPref);
 
         updateStreamView(this);
     }
@@ -319,6 +278,8 @@ public class StreamActivity extends Activity {
         }
         catch (Exception e) {
         }
+
+        PeriodSummaryService.startService(this);
     }
 
     @Override

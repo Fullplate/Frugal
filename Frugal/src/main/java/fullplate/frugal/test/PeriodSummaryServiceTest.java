@@ -33,7 +33,7 @@ public class PeriodSummaryServiceTest extends TestCase {
         day = 86400000L;
 
         for (int i = 0; i < 50; i++) {
-            entries.add(new SingleEntry("Description "+Integer.toString(i), i, start+(i*day)));
+            entries.add(new SingleEntry(start+(i*day), i, "Description "+Integer.toString(i)));
         }
 
         PeriodSummaryService summaryBuilder = null; //new PeriodSummaryService(entries);

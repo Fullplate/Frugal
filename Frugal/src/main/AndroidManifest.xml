@@ -9,7 +9,7 @@
         android:theme="@style/AppTheme" >
 
         <activity
-            android:name=".activities.StreamActivity"
+            android:name=".view.StreamActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
             <intent-filter>
@@ -20,10 +20,10 @@
         </activity>
 
         <activity
-            android:name=".activities.StatisticsActivity"
+            android:name=".view.StatisticsActivity"
             android:label="@string/action_statistics"
             android:screenOrientation="portrait"
-            android:parentActivityName=".activities.StreamActivity" >
+            android:parentActivityName=".view.StreamActivity" >
             <!-- Parent activity meta-data to support 4.0 -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -31,10 +31,10 @@
         </activity>
 
         <activity
-            android:name=".activities.SettingsActivity"
+            android:name=".view.SettingsActivity"
             android:label="@string/action_settings"
             android:screenOrientation="portrait"
-            android:parentActivityName=".activities.StreamActivity" >
+            android:parentActivityName=".view.StreamActivity" >
             <!-- Parent activity meta-data to support 4.0 -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

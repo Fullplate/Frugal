@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/grey_medium"
-    tools:context="fullplate.frugal.activities.StreamActivity">
+    tools:context="fullplate.frugal.view.StreamActivity">
 
     <LinearLayout
         android:id="@+id/stream_actions"

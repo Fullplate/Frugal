@@ -5,7 +5,7 @@ abstract public class Entry implements Comparable<Entry>{
     protected int amount;
     protected final Long timestamp;
 
-    public Entry(String description, int amount, Long timestamp) {
+    public Entry(Long timestamp, int amount, String description) {
         this.description = description;
         this.amount = amount;
         this.timestamp = timestamp;

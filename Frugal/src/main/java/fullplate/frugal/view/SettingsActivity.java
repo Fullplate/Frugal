@@ -1,9 +1,11 @@
-package fullplate.frugal.activities;
+package fullplate.frugal.view;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
+
+import fullplate.frugal.view.SettingsFragment;
 
 public class SettingsActivity extends Activity {
 

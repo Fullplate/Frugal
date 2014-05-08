@@ -20,7 +20,8 @@
         android:summary="%s"
         android:key="defaultAmountPref"
         android:dependency="useDefaultPref"
-        android:defaultValue="None"
-        android:inputType="number"/>
+        android:defaultValue="-1"
+        android:inputType="number"
+        android:maxLength="5"/>
 
 </PreferenceScreen>

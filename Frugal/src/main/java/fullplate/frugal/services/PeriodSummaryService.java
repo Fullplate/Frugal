@@ -9,22 +9,35 @@ import java.util.TreeMap;
 
 import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
+import fullplate.frugal.domain.SingleEntry;
 
 public class PeriodSummaryService {
+
+    // todo: this class should probably be instantiated at static time from a database, and have a private constructor
+
+    private static PeriodSummaryService summaryService = null;
+    public static PeriodSummaryService getService()
+    {
+        return summaryService;
+    }
 
     private SortedMap<PeriodSummary, ArrayList<Entry>> summaries;
     private ArrayList<Entry> entries;
     private long startTime;
     private CalendarPeriod period;
-    private int defaultAmount;
+    private int defaultTarget;
 
-    public PeriodSummaryService(ArrayList<Entry> entries, long startTime, CalendarPeriod period, int defaultAmount) {
+    public PeriodSummaryService(ArrayList<Entry> entries, long startTime, CalendarPeriod period, int defaultTarget) {
+        if (summaryService == null) {
+            summaryService = this;
+        }
+
         summaries = new TreeMap<>();
 
         this.entries = entries;
         this.startTime = startTime;
         this.period = period;
-        this.defaultAmount = defaultAmount;
+        this.defaultTarget = defaultTarget;
 
         updateSummaries();
     }
@@ -41,19 +54,61 @@ public class PeriodSummaryService {
         return entries;
     }
 
+    public CalendarPeriod getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(CalendarPeriod period) {
+        this.period = period;
+    }
+
+    public void setDefaultTarget(int defaultTarget) {
+        this.defaultTarget = defaultTarget;
+    }
+
+    public void setSpecificTarget(PeriodSummary summary, int target) {
+        // linear search is fine since summaries are ordered from newest to oldest
+        for (PeriodSummary s : summaries.keySet()) {
+            if (s.equals(summary)) {
+                s.setTarget(target);
+            }
+        }
+    }
+
     public void addEntry(Entry e) {
         entries.add(e);
         updateSummaries();
     }
 
-    public void removeLastEntry() {
-        if (entries.size() > 0) {
-            entries.remove(entries.size() - 1);
-            updateSummaries();
+    public void removeEntry(Entry entry) {
+        for (int i = 0; i < entries.size(); i++) {
+            if (entry.getTimestamp().equals(entries.get(i).getTimestamp())) {
+                entries.remove(i);
+                break;
+            }
         }
+
+        updateSummaries();
     }
 
-    private void printSummaries() {
+    public void removeLatestEntry() {
+        for (int i = 0; i < entries.size(); i++) {
+            if (entries.get(i) instanceof SingleEntry) {
+                entries.remove(i);
+                break;
+            }
+        }
+
+        updateSummaries();
+    }
+
+    public void clearData() {
+        entries = new ArrayList<>();
+        startTime = System.currentTimeMillis();
+        updateSummaries();
+    }
+
+    public void printSummaries() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM");
 
         for (PeriodSummary summary : getSummaries()) {
@@ -62,16 +117,14 @@ public class PeriodSummaryService {
             System.out.println("Summary: "+displayDate+", $"+summary.getCurrentAmount()+"\n");
 
             for (Entry entry : summaries.get(summary)) {
-                System.out.println("entry: "+entry.getDescription());
+                System.out.println("entry: "+entry.getDescription()+", timestamp: "+entry.getTimestamp());
             }
         }
     }
 
-    // todo: if these are always called together, they could be combined into a single function
-    // todo: rebuilding summaries every time is obviously inefficient, but will do for now
     // todo: write to database on update?
     // we assume entries are ordered from oldest->newest
-    private void updateSummaries() {
+    public void updateSummaries() {
         summaries = new TreeMap<>();
 
         Collections.sort(entries);
@@ -89,7 +142,7 @@ public class PeriodSummaryService {
         while (startMarker.getTimeInMillis() < now) {
             endMarker.add(period.getField(), period.getAmount());
 
-            PeriodSummary newSummary = new PeriodSummary(startMarker.getTimeInMillis(), endMarker.getTimeInMillis(), defaultAmount);
+            PeriodSummary newSummary = new PeriodSummary(startMarker.getTimeInMillis(), endMarker.getTimeInMillis(), defaultTarget);
             summaries.put(newSummary, new ArrayList<Entry>());
 
             startMarker.setTimeInMillis(endMarker.getTimeInMillis());
@@ -99,9 +152,12 @@ public class PeriodSummaryService {
     private void fillSummaries() {
         for (Entry e : entries) {
             for (PeriodSummary s : getSummaries()) {
-                if (e.getTimestamp() >= s.getStartTimestamp() || e.getTimestamp() == -1) {
+                if (e.getTimestamp() >= s.getStartTimestamp() && e.getTimestamp() <= s.getEndTimestamp()) {
                     summaries.get(s).add(e);
                     break;
+                }
+                else if (e.getTimestamp() == -1) {
+                    summaries.get(s).add(e);
                 }
             }
         }

@@ -24,19 +24,21 @@
             android:label="@string/action_statistics"
             android:screenOrientation="portrait"
             android:parentActivityName=".activities.StreamActivity" >
+            <!-- Parent activity meta-data to support 4.0 -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="fullplate.frugal.activities.StreamActivity" />
+                android:value=".activities.StreamActivity" />
         </activity>
 
         <activity
-            android:name=".activities.PreferencesActivity"
-            android:label="@string/action_preferences"
+            android:name=".activities.SettingsActivity"
+            android:label="@string/action_settings"
             android:screenOrientation="portrait"
             android:parentActivityName=".activities.StreamActivity" >
+            <!-- Parent activity meta-data to support 4.0 -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="fullplate.frugal.activities.StreamActivity" />
+                android:value=".activities.StreamActivity" />
         </activity>
 
     </application>

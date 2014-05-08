@@ -5,9 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 
-import fullplate.frugal.R;
-
-public class StatisticsActivity extends Activity {
+public class SettingsActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -24,7 +22,7 @@ public class StatisticsActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_statistics);
+        getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsFragment()).commit();
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }

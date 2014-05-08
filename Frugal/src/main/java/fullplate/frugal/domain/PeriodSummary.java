@@ -3,13 +3,13 @@ package fullplate.frugal.domain;
 public class PeriodSummary implements Comparable<PeriodSummary> {
     private final Long startTimestamp;
     private final Long endTimestamp;
-    private int maximumAmount;
+    private int target;
     private int currentAmount;
 
-    public PeriodSummary(Long startTimestamp, Long endTimestamp, int maximumAmount) {
+    public PeriodSummary(Long startTimestamp, Long endTimestamp, int target) {
         this.startTimestamp = startTimestamp;
         this.endTimestamp = endTimestamp;
-        this.maximumAmount = maximumAmount;
+        this.target = target;
 
         this.currentAmount = 0;
     }
@@ -22,15 +22,18 @@ public class PeriodSummary implements Comparable<PeriodSummary> {
         return endTimestamp;
     }
 
-    public int getMaximumAmount() {
-        return maximumAmount;
+    public int getTarget() {
+        return target;
     }
 
     public int getCurrentAmount() {
         return currentAmount;
     }
 
-    // total amount can be set independently for each period
+    public void setTarget(int target) {
+        this.target = target;
+    }
+
     public void increaseCurrentAmount(int amount) {
         this.currentAmount += amount;
     }

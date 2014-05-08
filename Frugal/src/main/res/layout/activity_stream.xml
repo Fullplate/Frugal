@@ -14,35 +14,37 @@
         android:orientation="horizontal"
         android:paddingLeft="@dimen/stream_border"
         android:paddingRight="@dimen/stream_border"
-        android:background="@color/grey_light">
+        android:paddingTop="@dimen/stream_border"
+        android:paddingBottom="@dimen/stream_border">
 
-        <Button
+        <TextView
             android:id="@+id/stream_actions_add_single"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="15sp"
-            style="?android:attr/buttonStyleSmall"
-            android:text="Add Single"/>
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:background="@color/orange_primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:text="@string/action_add_single_entry"/>
 
-        <Button
+        <TextView
             android:id="@+id/stream_actions_add_periodic"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="15sp"
-            style="?android:attr/buttonStyleSmall"
-            android:text="Add Recurring"
-            />
-
-        <Button
-            android:id="@+id/stream_actions_remove_last"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="15sp"
-            style="?android:attr/buttonStyleSmall"
-            android:text="Undo"/>
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_marginLeft="@dimen/stream_border"
+            android:background="@color/orange_primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:text="@string/action_add_periodic_entry"/>
 
     </LinearLayout>
 
@@ -50,7 +52,6 @@
         android:id="@+id/stream_explistview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="@dimen/stream_border"
         android:paddingLeft="@dimen/stream_border"
         android:paddingRight="@dimen/stream_border"/>
 

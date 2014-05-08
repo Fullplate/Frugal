@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 
 import fullplate.frugal.R;
 
-public class PreferencesFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +61,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
         }
         else if (preference instanceof EditTextPreference) {
             EditTextPreference editTextPreference = (EditTextPreference) preference;
-            if (editTextPreference.getText().equals("None")) {
+            if (editTextPreference.getText().equals("-1")) {
                 editTextPreference.setSummary("None");
             }
             else {

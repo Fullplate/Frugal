@@ -1,9 +1,9 @@
 package fullplate.frugal.domain;
 
 abstract public class Entry implements Comparable<Entry>{
-    private String description;
-    private int amount;
-    private final Long timestamp;
+    protected String description;
+    protected int amount;
+    protected final Long timestamp;
 
     public Entry(String description, int amount, Long timestamp) {
         this.description = description;
@@ -27,6 +27,7 @@ abstract public class Entry implements Comparable<Entry>{
         this.amount = amount;
     }
 
-    @Override
+    abstract public String getTimestampString();
+
     abstract public int compareTo(Entry that);
 }

@@ -13,19 +13,19 @@ import android.text.InputFilter;
 import android.text.InputType;
 import android.util.TypedValue;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.SortedMap;
@@ -43,36 +43,36 @@ import fullplate.frugal.view.ExpandableStreamAdapter;
 /*
 TODO
 - view caching for expandablelistview
-- the blue highlight, blue for inputview etc. should be changed to orange
-- better styling for buttons
-- better styling for headers
-- better styling for entries -- see also http://stackoverflow.com/questions/5132699/android-how-to-change-the-position-of-expandablelistview-indicator
-- header remains at top of screen and contents scroll (might require different listview)
 - persisting data using sharedpreferences or SQLite (ideal). Entries at first then possibly PeriodSummaries.
 - statistics screen
-- icon click for back won't work on 4.0.3
-- 'set target' action on headers
-- clear data in overflow actionbar
 
-fri - Preferences
-- get preferences from SharedPreferences and use as args to PeriodSummaryService
-- add handling for the default of no targets
-- add 'set target' action on headers
-- polish header/entry styling a bit
+Dialogs:
+- a click on the transparent part closes the dialog but not the keyboard (http://stackoverflow.com/questions/4165414/how-to-hide-soft-keyboard-on-android-after-clicking-outside-edittext)
+- custom keyboard for currency input
+- use AutoCompleteTextView with a dataadapter of previous descriptions
+- since this code is duplicated 4+ times we could wrap it in a class
+
+Misc:
+- tidy code
+- tidy font sizes/dimens/hardcoded strings etc.
+- unify the repetitive stuff?
+- different font types?
+
+- since we're only persisting entries, may need to remove the ability to individually set targets
  */
 
 public class StreamActivity extends Activity {
 
-    private PeriodSummaryService summaryService;
-
     private static ArrayList<Entry> generateTestEntries() {
-        long start = 1388534400L * 1000;
         long day = 86400000;
 
         ArrayList<Entry> entries = new ArrayList<>();
 
-        for (int i = 0; i < 200; i++) {
-            entries.add(new SingleEntry("Description "+Integer.toString(i), i, start+(i*day)));
+        for (int i = 0; i < 40; i++) {
+            long time = generateTestStartTime()+(i*day);
+            if (time < System.currentTimeMillis()) {
+                entries.add(new SingleEntry("Description "+Integer.toString(i), i, generateTestStartTime()+(i*day)));
+            }
         }
 
         entries.add(new PeriodicEntry("P1", 10));
@@ -82,67 +82,61 @@ public class StreamActivity extends Activity {
     }
 
     private static long generateTestStartTime() {
-        return 1388534400L * 1000; // 1st jan '14, midnight
+        return 1396310400L * 1000; // 1st apr '14, midnight
     }
 
-    public void showSummaryMenu(final View v) {
-        PopupMenu popup = new PopupMenu(this, v);
+    public static void updateStreamView(Activity activity) {
+        ArrayList<PeriodSummary> summaries = PeriodSummaryService.getService().getSummaries();
+        SortedMap<PeriodSummary, ArrayList<Entry>> summaryMap = PeriodSummaryService.getService().getSummaryMap();
 
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.stream_header_menu_settarget:
-                        createSetTargetDialog();
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        });
-
-        popup.inflate(R.layout.stream_summary_menu);
-        popup.show();
-    }
-
-    private void updateStreamView() {
-        ArrayList<PeriodSummary> summaries = summaryService.getSummaries();
-        SortedMap<PeriodSummary, ArrayList<Entry>> summaryMap = summaryService.getSummaryMap();
-
-        ExpandableListView stream = (ExpandableListView) findViewById(R.id.stream_explistview);
-        ExpandableStreamAdapter streamAdapter = new ExpandableStreamAdapter(this, R.layout.stream_entry, R.layout.stream_summary, summaries, summaryMap);
+        ExpandableListView stream = (ExpandableListView) activity.findViewById(R.id.stream_explistview);
+        ExpandableStreamAdapter streamAdapter = new ExpandableStreamAdapter(activity, R.layout.stream_entry, R.layout.stream_summary, summaries, summaryMap);
 
         stream.setAdapter(streamAdapter);
         stream.expandGroup(0);
-    }
-
-    private void removeLastEntry() {
-        summaryService.removeLastEntry();
-
-        updateStreamView();
     }
 
     private TextView getInputDialogLabel(String text) {
         TextView label = new TextView(this);
         label.setText(text);
         label.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.entry_input_font_size));
-        label.setPadding(PixelUtils.dpToPixels(this, 10), PixelUtils.dpToPixels(this, 5), 0, PixelUtils.dpToPixels(this, 5));
+        label.setPadding(PixelUtils.dpToPixels(this, 10), PixelUtils.dpToPixels(this, 10), 0, PixelUtils.dpToPixels(this, 10));
         label.setTextColor(getResources().getColor(R.color.orange_primary));
         label.setBackgroundColor(getResources().getColor(R.color.grey_light2));
 
         return label;
     }
 
-    private void createSetTargetDialog() {
-        System.out.println("HELLO!");
+    private void createClearDataDialog() {
+        AlertDialog.Builder adb = new AlertDialog.Builder(this);
+
+        LinearLayout holder = new LinearLayout(this);
+        holder.setOrientation(LinearLayout.VERTICAL);
+
+        TextView label = getInputDialogLabel("Are you sure?");
+        holder.addView(label);
+
+        adb.setView(holder);
+
+        adb.setPositiveButton("Clear Data", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                PeriodSummaryService.getService().clearData();
+                StreamActivity.updateStreamView(StreamActivity.this);
+                Toast.makeText(StreamActivity.this, "Data cleared!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        adb.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        adb.show();
     }
 
-    private void createInputDialog(final String whichAction) {
-        // todo
-        // a click on the transparent part closes the dialog but not the keyboard (http://stackoverflow.com/questions/4165414/how-to-hide-soft-keyboard-on-android-after-clicking-outside-edittext)
-        // custom keyboard for currency input
-        // use AutoCompleteTextView with a dataadapter of previous descriptions
-
+    private void createNewEntryDialog(final String whichAction) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         LinearLayout holder = new LinearLayout(this);
@@ -177,16 +171,18 @@ public class StreamActivity extends Activity {
                 try {
                     if (whichAction.equals("single")) {
                         Entry e = new SingleEntry(descInput.getText().toString(), Integer.parseInt(amountInput.getText().toString()), System.currentTimeMillis());
-                        StreamActivity.this.summaryService.addEntry(e);
+                        PeriodSummaryService.getService().addEntry(e);
                     }
                     else if (whichAction.equals("periodic")) {
                         Entry e = new PeriodicEntry(descInput.getText().toString(), Integer.parseInt(amountInput.getText().toString()));
-                        StreamActivity.this.summaryService.addEntry(e);
+                        PeriodSummaryService.getService().addEntry(e);
                     }
+
+                    updateStreamView(StreamActivity.this);
                 }
                 catch (NumberFormatException e) {
                     Toast.makeText(StreamActivity.this, "Invalid input!", Toast.LENGTH_SHORT).show();
-                    createInputDialog(whichAction);
+                    createNewEntryDialog(whichAction);
                 }
 
                 imm.hideSoftInputFromWindow(descInput.getWindowToken(), 0);
@@ -211,30 +207,21 @@ public class StreamActivity extends Activity {
     }
 
     private void setClickListeners() {
-        Button btnSingle = (Button) findViewById(R.id.stream_actions_add_single);
+        TextView addSingleButton = (TextView) findViewById(R.id.stream_actions_add_single);
 
-        btnSingle.setOnClickListener(new View.OnClickListener() {
+        addSingleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createInputDialog("single");
+                createNewEntryDialog("single");
             }
         });
 
-        Button btnPeriodic = (Button) findViewById(R.id.stream_actions_add_periodic);
+        TextView addPeriodicButton = (TextView) findViewById(R.id.stream_actions_add_periodic);
 
-        btnPeriodic.setOnClickListener(new View.OnClickListener() {
+        addPeriodicButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //createInputDialog("periodic");
-            }
-        });
-
-        Button btnRemoveLast = (Button) findViewById(R.id.stream_actions_remove_last);
-
-        btnRemoveLast.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                removeLastEntry();
+                createNewEntryDialog("periodic");
             }
         });
     }
@@ -242,6 +229,7 @@ public class StreamActivity extends Activity {
     private void updatePeriodSummaryService() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
+        // extract CalendarPeriod from preferences
         String periodPref = sharedPref.getString("periodPref", "");
         CalendarPeriod calendarPeriod;
 
@@ -259,10 +247,38 @@ public class StreamActivity extends Activity {
                 calendarPeriod = new CalendarPeriod(Calendar.DAY_OF_YEAR, 7);
         }
 
-        int defaultAmountPref = Integer.parseInt(sharedPref.getString("defaultAmountPref", "0")); // check out nicer way of doing this
+        // extract "default target amount" from preferences
+        int defaultAmountPref = Integer.parseInt(sharedPref.getString("defaultAmountPref", "-1"));
 
-        summaryService = new PeriodSummaryService(generateTestEntries(), generateTestStartTime(), calendarPeriod, defaultAmountPref);
+        // if we are not using a default amount, have to manually set the amount to -1
+        boolean useDefaultAmount = sharedPref.getBoolean("useDefaultPref", false);
+        if (!useDefaultAmount) {
+            defaultAmountPref = -1;
+        }
+
+        PeriodSummaryService service;
+
+        // todo: this is dodgy, but will do until we use a datastore to initialize the service
+        if (PeriodSummaryService.getService() == null) {
+            service = new PeriodSummaryService(generateTestEntries(), generateTestStartTime(), calendarPeriod, defaultAmountPref);
+        }
+        else {
+            service = PeriodSummaryService.getService();
+            service.setPeriod(calendarPeriod);
+            service.setDefaultTarget(defaultAmountPref);
+            service.updateSummaries();
+        }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        updatePeriodSummaryService();
+
+        updateStreamView(this);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -272,16 +288,26 @@ public class StreamActivity extends Activity {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        updatePeriodSummaryService();
-
-        updateStreamView();
-
         setClickListeners();
+
+        // force overflow menu on devices with a physical menu button
+        try {
+            ViewConfiguration config = ViewConfiguration.get(this);
+            Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
+
+            if (menuKeyField != null) {
+                menuKeyField.setAccessible(true);
+                menuKeyField.setBoolean(config, false);
+            }
+        }
+        catch (Exception e) {
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+
         return true;
     }
 
@@ -289,12 +315,15 @@ public class StreamActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_statistics) {
-            // todo: send PeriodSummaryService through, or make it globally accessible.
             startActivity(new Intent(this, StatisticsActivity.class));
             return true;
         }
         else if (id == R.id.action_preferences) {
-            startActivity(new Intent(this, PreferencesActivity.class));
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
+        else if (id == R.id.action_clear_data) {
+            createClearDataDialog();
             return true;
         }
         return super.onOptionsItemSelected(item);

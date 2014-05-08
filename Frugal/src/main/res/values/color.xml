@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="orange_primary">#FF8800</color>
+    <color name="orange_primary_selected">#D96200</color>
     <color name="orange_secondary">#FFBB33</color>
     <color name="stream_header_amount_exceeded">#e50000</color>
     <color name="grey_medium">#666666</color>

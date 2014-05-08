@@ -14,6 +14,7 @@ import android.text.InputType;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
@@ -224,6 +225,22 @@ public class StreamActivity extends Activity {
                 createNewEntryDialog("periodic");
             }
         });
+
+        View.OnTouchListener buttonDimmer = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                    view.setBackgroundColor(StreamActivity.this.getResources().getColor(R.color.orange_primary_selected));
+                }
+                else if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+                    view.setBackgroundColor(StreamActivity.this.getResources().getColor(R.color.orange_primary));
+                }
+                return false;
+            }
+        };
+
+        addSingleButton.setOnTouchListener(buttonDimmer);
+        addPeriodicButton.setOnTouchListener(buttonDimmer);
     }
 
     private void updatePeriodSummaryService() {

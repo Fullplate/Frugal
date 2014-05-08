@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:paddingLeft="35dp"
-        android:textSize="16sp"/>
+        android:textSize="@dimen/stream_fontsize_large"/>
 
     <TextView
         android:id="@+id/stream_header_amount"
@@ -21,15 +21,6 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@id/stream_header_date"
         android:paddingLeft="30dp"
-        android:textSize="16sp"/>
-
-    <ImageView
-        android:id="@+id/stream_header_action_target"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:paddingRight="6dp"
-        android:src="@drawable/ic_action_target" />
+        android:textSize="@dimen/stream_fontsize_large"/>
 
 </RelativeLayout>

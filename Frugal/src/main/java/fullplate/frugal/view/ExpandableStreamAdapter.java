@@ -27,10 +27,8 @@ import java.util.ArrayList;
 import java.util.SortedMap;
 
 import fullplate.frugal.R;
-import fullplate.frugal.activities.StreamActivity;
 import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
-import fullplate.frugal.domain.SingleEntry;
 import fullplate.frugal.services.PeriodSummaryService;
 import fullplate.frugal.utilities.PixelUtils;
 
@@ -51,7 +49,7 @@ public class ExpandableStreamAdapter extends BaseExpandableListAdapter {
     }
 
     public Entry getChild(int groupPosition, int childPosition) {
-        return data.get(headers.get(groupPosition)).get(childPosition); // yuck
+        return data.get(headers.get(groupPosition)).get(childPosition);
     }
 
     @Override
@@ -65,7 +63,7 @@ public class ExpandableStreamAdapter extends BaseExpandableListAdapter {
         LinearLayout holder = new LinearLayout(context);
         holder.setOrientation(LinearLayout.VERTICAL);
 
-        TextView label = getInputDialogLabel("Are you sure?");
+        TextView label = StreamActivity.getInputDialogLabel(context, "Are you sure?");
         holder.addView(label);
 
         adb.setView(holder);
@@ -136,70 +134,6 @@ public class ExpandableStreamAdapter extends BaseExpandableListAdapter {
         return groupPosition;
     }
 
-    private TextView getInputDialogLabel(String text) {
-        TextView label = new TextView(context);
-        label.setText(text);
-        label.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources().getDimension(R.dimen.entry_input_font_size));
-        label.setPadding(PixelUtils.dpToPixels(context, 10), PixelUtils.dpToPixels(context, 10), 0, PixelUtils.dpToPixels(context, 10));
-        label.setTextColor(context.getResources().getColor(R.color.orange_primary));
-        label.setBackgroundColor(context.getResources().getColor(R.color.grey_light2));
-
-        return label;
-    }
-
-    private void createSetTargetDialog(final PeriodSummary periodSummary) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-        LinearLayout holder = new LinearLayout(context);
-        holder.setOrientation(LinearLayout.VERTICAL);
-
-        TextView label = getInputDialogLabel("Target Amount");
-
-        final EditText amountInput = new EditText(context);
-        amountInput.setInputType(InputType.TYPE_CLASS_NUMBER);
-        amountInput.setRawInputType(Configuration.KEYBOARD_12KEY);
-        amountInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5)});
-
-        holder.addView(label);
-        holder.addView(amountInput);
-
-        builder.setView(holder);
-
-        final InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                try {
-                    PeriodSummaryService.getService().setSpecificTarget(periodSummary, Integer.parseInt(amountInput.getText().toString()));
-                    StreamActivity.updateStreamView((Activity) context);
-                }
-                catch (NumberFormatException e) {
-                    Toast.makeText(context, "Invalid input!", Toast.LENGTH_SHORT).show();
-                    createSetTargetDialog(periodSummary);
-                }
-
-                imm.hideSoftInputFromWindow(amountInput.getWindowToken(), 0);
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                imm.hideSoftInputFromWindow(amountInput.getWindowToken(), 0);
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
-
-        // display keyboard automatically
-        amountInput.requestFocus();
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-
-        // fix for area underneath keyboard being redrawn when keyboard is closed
-        ((Activity) context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-    }
-
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         View row = convertView;
@@ -215,12 +149,14 @@ public class ExpandableStreamAdapter extends BaseExpandableListAdapter {
 
         TextView amountTextView = (TextView) row.findViewById(R.id.stream_header_amount);
 
-        // conditionally display target if we have a default or user has set a target
-        // note: don't even need to check this -- user needs to have set default target as well
-        boolean useDefaultAmount = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("useDefaultPref", false);
+        String currencySymbol = context.getResources().getString(R.string.currency_symbol);
 
-        if (useDefaultAmount || periodSummary.getTarget() != -1) {
-            amountTextView.setText("$" + Integer.toString(periodSummary.getCurrentAmount()) + " / $" + Integer.toString(periodSummary.getTarget()));
+        // conditionally display target if useDefaultTarget preference is true and the user set a target
+        boolean useDefaultTarget = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("useDefaultPref", false);
+
+        if (useDefaultTarget || periodSummary.getTarget() != -1) {
+            amountTextView.setText(currencySymbol + Integer.toString(periodSummary.getCurrentAmount())
+                    + " / " + currencySymbol + Integer.toString(periodSummary.getTarget()));
 
             // maximum amount exceeded
             if (periodSummary.getCurrentAmount() > periodSummary.getTarget()) {
@@ -228,7 +164,7 @@ public class ExpandableStreamAdapter extends BaseExpandableListAdapter {
             }
         }
         else {
-            amountTextView.setText("$"+Integer.toString(periodSummary.getCurrentAmount()));
+            amountTextView.setText(currencySymbol + Integer.toString(periodSummary.getCurrentAmount()));
         }
 
         // alternate styling for the active (first) header
@@ -240,15 +176,6 @@ public class ExpandableStreamAdapter extends BaseExpandableListAdapter {
         else {
             row.setBackgroundColor(context.getResources().getColor(R.color.orange_secondary));
         }
-
-        // setup the 'set target' action
-        ImageView setTarget = (ImageView) row.findViewById(R.id.stream_header_action_target);
-        setTarget.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                createSetTargetDialog(periodSummary);
-            }
-        });
 
         return row;
     }

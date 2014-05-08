@@ -141,23 +141,6 @@ public class PeriodSummaryService {
         return period;
     }
 
-    public void setPeriod(CalendarPeriod period) {
-        this.period = period;
-    }
-
-    public void setDefaultTarget(int defaultTarget) {
-        this.defaultTarget = defaultTarget;
-    }
-
-    public void setSpecificTarget(PeriodSummary summary, int target) {
-        // linear search is fine since summaries are ordered from newest to oldest
-        for (PeriodSummary s : summaries.keySet()) {
-            if (s.equals(summary)) {
-                s.setTarget(target);
-            }
-        }
-    }
-
     public void updatePreferences(SharedPreferences sharedPref) {
         this.period = readPeriodPref(sharedPref);
         this.defaultTarget = readDefaultTargetPref(sharedPref);

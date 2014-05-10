@@ -1,8 +1,10 @@
 <resources>
     <dimen name="stream_border">8dp</dimen>
+    <dimen name="statistics_spacing">12dp</dimen>
 
-    <dimen name="stream_fontsize_large">16sp</dimen>
-    <dimen name="stream_fontsize_normal">14sp</dimen>
-    <dimen name="stream_fontsize_small">12sp</dimen>
-    <dimen name="dialog_label_fontsize">20sp</dimen>
+    <dimen name="font_size_small">12sp</dimen>
+    <dimen name="font_size_normal">14sp</dimen>
+    <dimen name="font_size_large">16sp</dimen>
+    <dimen name="font_size_xl">18sp</dimen>
+    <dimen name="font_size_xxl">20sp</dimen>
 </resources>

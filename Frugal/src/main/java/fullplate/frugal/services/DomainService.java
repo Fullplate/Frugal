@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -46,7 +47,8 @@ public class DomainService {
         CalendarPeriod period = readPeriodPref(sharedPref);
         int defaultAmount = readDefaultTargetPref(sharedPref);
 
-        summaryService = new DomainService(entries, startTime, period, defaultAmount);
+        //summaryService = new DomainService(TestData.generateTestEntries(), TestData.generateTestStartTime(), period, defaultAmount);
+        summaryService = new DomainService(entries, startTime, period, defaultAmount); //todo
 
         summaryService.entriesTableHandler = entriesTableHandler;
         summaryService.sharedPref = sharedPref;
@@ -79,12 +81,12 @@ public class DomainService {
 
     private static int readDefaultTargetPref(SharedPreferences sharedPref) {
         // extract "default target amount" from preferences
-        int defaultAmountPref = Integer.parseInt(sharedPref.getString("defaultAmountPref", "-1"));
+        int defaultAmountPref = Integer.parseInt(sharedPref.getString("defaultAmountPref", "0"));
 
-        // if we are not using a default amount, have to manually set the amount to -1
+        // if we are not using a default amount, have to manually set the amount to 0
         boolean useDefaultAmount = sharedPref.getBoolean("useDefaultPref", false);
         if (!useDefaultAmount) {
-            defaultAmountPref = -1;
+            defaultAmountPref = 0;
         }
 
         return defaultAmountPref;
@@ -108,25 +110,29 @@ public class DomainService {
     protected EntriesTableHandler entriesTableHandler;
     protected SharedPreferences sharedPref;
 
-    private SortedMap<PeriodSummary, ArrayList<Entry>> summaries;
-    private ArrayList<Entry> entries;
     private long startTime;
     private CalendarPeriod period;
     private int defaultTarget;
 
-    public DomainService(ArrayList<Entry> entries, long startTime, CalendarPeriod period, int defaultTarget) {
+    private SortedMap<PeriodSummary, ArrayList<Entry>> summaries;
+    private ArrayList<Entry> entries;
+    private HashSet<String> descriptions;
+
+    private DomainService(ArrayList<Entry> entries, long startTime, CalendarPeriod period, int defaultTarget) {
         if (summaryService == null) {
             summaryService = this;
         }
-
-        summaries = new TreeMap<>();
 
         this.entries = entries;
         this.startTime = startTime;
         this.period = period;
         this.defaultTarget = defaultTarget;
 
+        summaries = new TreeMap<>();
+        descriptions = new HashSet<>();
+
         updateSummaries();
+        updateDescriptionSet();
     }
 
     public SortedMap<PeriodSummary, ArrayList<Entry>> getSummaryMap() {
@@ -145,14 +151,40 @@ public class DomainService {
         return period;
     }
 
+    public int getDefaultTarget() {
+        return defaultTarget;
+    }
+
+    public String getPeriodString() {
+        switch (period.getField()) {
+            case Calendar.DAY_OF_YEAR:
+                switch (period.getAmount()) {
+                    case 7:
+                        return "Weekly";
+                    case 14:
+                        return "Biweekly";
+                }
+                break;
+            case Calendar.MONTH:
+                return "Monthly";
+        }
+
+        return "";
+    }
+
+    public String[] getDescriptions() {
+        return descriptions.toArray(new String[descriptions.size()]);
+    }
+
     public void updatePreferences(SharedPreferences sharedPref) {
         this.period = readPeriodPref(sharedPref);
         this.defaultTarget = readDefaultTargetPref(sharedPref);
     }
 
     public void addEntry(Entry e) {
-        entries.add(e);                     // update in-memory entries
+        entries.add(e); // update in-memory entries
         entriesTableHandler.createEntry(e); // update entries table in database
+        descriptions.add(e.getDescription()); // update set of descriptions
 
         updateSummaries();
     }
@@ -177,6 +209,10 @@ public class DomainService {
         startTime = readStartTimePref(sharedPref, true);
 
         updateSummaries();
+    }
+
+    public void filterExpensesByDescription(String[] descriptions) {
+
     }
 
     public void printSummaries() {
@@ -239,4 +275,11 @@ public class DomainService {
             }
         }
     }
+
+    private void updateDescriptionSet() {
+        for (Entry e : entries) {
+            descriptions.add(e.getDescription());
+        }
+    }
+
 }

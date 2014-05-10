@@ -78,26 +78,42 @@ public class ExpandableStreamAdapter extends BaseExpandableListAdapter {
         adb.show();
     }
 
+    private static class ChildViewHolder {
+        TextView timestampView;
+        TextView descriptionView;
+        TextView amountView;
+        ImageView deleteButton;
+    }
+
     @Override
     public View getChildView(int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         View row = convertView;
+        ChildViewHolder viewHolder;
+
+        if (row == null) {
+            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+            row = inflater.inflate(itemResourceId, parent, false);
+
+            viewHolder = new ChildViewHolder();
+            viewHolder.timestampView = (TextView) row.findViewById(R.id.stream_entry_timestamp);
+            viewHolder.descriptionView = (TextView) row.findViewById(R.id.stream_entry_description);
+            viewHolder.amountView = (TextView) row.findViewById(R.id.stream_entry_amount);
+            viewHolder.deleteButton = (ImageView) row.findViewById(R.id.stream_entry_action_delete);
+
+            row.setTag(viewHolder);
+        }
+        else {
+            viewHolder = (ChildViewHolder) row.getTag();
+        }
+
         final Entry entry = getChild(groupPosition, childPosition);
 
-        LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-        row = inflater.inflate(itemResourceId, parent, false);
+        viewHolder.timestampView.setText(entry.getTimestampString());
+        viewHolder.descriptionView.setText(entry.getDescription());
+        viewHolder.amountView.setText(context.getResources().getString(R.string.currency_symbol) + Integer.toString(entry.getAmount()));
 
-        TextView timestampView = (TextView) row.findViewById(R.id.stream_entry_timestamp);
-        timestampView.setText(entry.getTimestampString());
-
-        TextView descriptionView = (TextView) row.findViewById(R.id.stream_entry_description);
-        descriptionView.setText(entry.getDescription());
-
-        TextView amountView = (TextView) row.findViewById(R.id.stream_entry_amount);
-        amountView.setText("$"+Integer.toString(entry.getAmount()));
-
-        // setup the 'set target' action
-        ImageView deleteButton = (ImageView) row.findViewById(R.id.stream_entry_action_delete);
-        deleteButton.setOnClickListener(new View.OnClickListener() {
+        // setup the 'delete entry' action
+        viewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 createDeleteEntryDialog(entry);
@@ -126,44 +142,60 @@ public class ExpandableStreamAdapter extends BaseExpandableListAdapter {
         return groupPosition;
     }
 
+    private static class GroupViewHolder {
+        TextView dateView;
+        TextView amountView;
+    }
+
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         View row = convertView;
+        GroupViewHolder viewHolder;
+
+        if (row == null) {
+            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+            row = inflater.inflate(headerResourceId, null);
+
+            viewHolder = new GroupViewHolder();
+
+            viewHolder.dateView = (TextView) row.findViewById(R.id.stream_header_date);
+            viewHolder.amountView = (TextView) row.findViewById(R.id.stream_header_amount);
+
+            row.setTag(viewHolder);
+        }
+        else {
+            viewHolder = (GroupViewHolder) row.getTag();
+        }
+
         final PeriodSummary periodSummary = getGroup(groupPosition);
 
-        LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-        row = inflater.inflate(headerResourceId, null);
-
-        TextView dateTextView = (TextView) row.findViewById(R.id.stream_header_date);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM");
         String displayDate = dateFormat.format(periodSummary.getStartTimestamp());
-        dateTextView.setText(displayDate);
-
-        TextView amountTextView = (TextView) row.findViewById(R.id.stream_header_amount);
+        viewHolder.dateView.setText(displayDate);
 
         String currencySymbol = context.getResources().getString(R.string.currency_symbol);
 
         // conditionally display target if useDefaultTarget preference is true and the user set a target
         boolean useDefaultTarget = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("useDefaultPref", false);
 
-        if (useDefaultTarget || periodSummary.getTarget() != -1) {
-            amountTextView.setText(currencySymbol + Integer.toString(periodSummary.getCurrentAmount())
+        if (useDefaultTarget && periodSummary.getTarget() != 0) {
+            viewHolder.amountView.setText(currencySymbol + Integer.toString(periodSummary.getCurrentAmount())
                     + " / " + currencySymbol + Integer.toString(periodSummary.getTarget()));
 
             // maximum amount exceeded
             if (periodSummary.getCurrentAmount() > periodSummary.getTarget()) {
-                amountTextView.setTextColor(context.getResources().getColor(R.color.stream_header_amount_exceeded));
+                viewHolder.amountView.setTextColor(context.getResources().getColor(R.color.stream_header_amount_exceeded));
             }
         }
         else {
-            amountTextView.setText(currencySymbol + Integer.toString(periodSummary.getCurrentAmount()));
+            viewHolder.amountView.setText(currencySymbol + Integer.toString(periodSummary.getCurrentAmount()));
         }
 
         // alternate styling for the active (first) header
         if (groupPosition == 0) {
             row.setBackgroundColor(context.getResources().getColor(R.color.orange_primary));
-            dateTextView.setTypeface(null, Typeface.BOLD);
-            amountTextView.setTypeface(null, Typeface.BOLD);
+            viewHolder.dateView.setTypeface(null, Typeface.BOLD);
+            viewHolder.amountView.setTypeface(null, Typeface.BOLD);
         }
         else {
             row.setBackgroundColor(context.getResources().getColor(R.color.orange_secondary));

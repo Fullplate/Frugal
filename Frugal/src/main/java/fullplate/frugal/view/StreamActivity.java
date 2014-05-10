@@ -19,6 +19,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
@@ -35,16 +37,14 @@ import fullplate.frugal.domain.PeriodSummary;
 import fullplate.frugal.domain.PeriodicEntry;
 import fullplate.frugal.domain.SingleEntry;
 import fullplate.frugal.services.DomainService;
+import fullplate.frugal.utilities.ArrayUtils;
 import fullplate.frugal.utilities.PixelUtils;
 
 /*
 TODO
-- statistics screen
-- view caching for expandablelistview
-- use AutoCompleteTextView with a dataadapter of previous descriptions
-- unify dialog code (possibly)
-- override styles for onclick highlights, preference dialogs etc.
 - ensure proguard is working (requires app signing first)
+- remove unused imports
+- remember to change .gitconfig
  */
 
 public class StreamActivity extends Activity {
@@ -63,7 +63,7 @@ public class StreamActivity extends Activity {
     public static TextView getInputDialogLabel(Context context, String text) {
         TextView label = new TextView(context);
         label.setText(text);
-        label.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources().getDimension(R.dimen.dialog_label_fontsize));
+        label.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources().getDimension(R.dimen.font_size_xxl));
         label.setPadding(PixelUtils.dpToPixels(context, 10), PixelUtils.dpToPixels(context, 10), 0, PixelUtils.dpToPixels(context, 10));
         label.setTextColor(context.getResources().getColor(R.color.orange_primary));
         label.setBackgroundColor(context.getResources().getColor(R.color.grey_light2));
@@ -104,15 +104,25 @@ public class StreamActivity extends Activity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         LinearLayout holder = new LinearLayout(this);
+        holder.setId(12345);
         holder.setOrientation(LinearLayout.VERTICAL);
 
         TextView descLabel = getInputDialogLabel(this, "Description");
         TextView amountLabel = getInputDialogLabel(this, "Amount");
 
-        final EditText descInput = new EditText(this);
+        final AutoCompleteTextView descInput = new AutoCompleteTextView(this);
         descInput.setInputType(InputType.TYPE_CLASS_TEXT);
         descInput.setFilters(new InputFilter[] { new InputFilter.LengthFilter(20) });
         descInput.setHint("Enter short description");
+
+        String[] defaultDescs = getResources().getStringArray(R.array.defaultDescriptions);
+        String[] userDescs = DomainService.getService().getDescriptions();
+        String[] allDescs = ArrayUtils.concatStringArrays(defaultDescs, userDescs);
+        String[] uniqueDescs = ArrayUtils.filterUniqueStrings(allDescs);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.simple_dropdown_item, uniqueDescs);
+        descInput.setAdapter(adapter);
+        descInput.setThreshold(1);
 
         final EditText amountInput = new EditText(this);
         amountInput.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -264,6 +274,12 @@ public class StreamActivity extends Activity {
         }
         else if (id == R.id.action_clear_data) {
             createClearDataDialog();
+            return true;
+        }
+        else if (id == R.id.action_help) {
+            Intent intent = new Intent(this, HelpActivity.class);
+            intent.putExtra("caller", getIntent().getComponent().getClassName());
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);

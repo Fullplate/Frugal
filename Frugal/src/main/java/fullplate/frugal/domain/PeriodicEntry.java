@@ -1,8 +1,5 @@
 package fullplate.frugal.domain;
 
-import java.util.Calendar;
-
-import fullplate.frugal.services.CalendarPeriod;
 import fullplate.frugal.services.DomainService;
 
 public class PeriodicEntry extends Entry {
@@ -13,22 +10,7 @@ public class PeriodicEntry extends Entry {
 
     @Override
     public String getTimestampString() {
-        CalendarPeriod period = DomainService.getService().getPeriod();
-
-        switch (period.getField()) {
-            case Calendar.DAY_OF_YEAR:
-                switch (period.getAmount()) {
-                    case 7:
-                        return "Weekly";
-                    case 14:
-                        return "Biweekly";
-                }
-                break;
-            case Calendar.MONTH:
-                return "Monthly";
-        }
-
-        return "";
+        return DomainService.getService().getPeriodString();
     }
 
     @Override

@@ -10,10 +10,13 @@ import android.preference.PreferenceGroup;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import fullplate.frugal.R;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+    private EditText defaultAmountPref;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +64,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
         else if (preference instanceof EditTextPreference) {
             EditTextPreference editTextPreference = (EditTextPreference) preference;
-            if (editTextPreference.getText().equals("-1")) {
+            if (editTextPreference.getText().equals("0")) {
                 editTextPreference.setSummary("None");
             }
             else {

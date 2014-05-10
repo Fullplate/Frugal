@@ -2,7 +2,31 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+        <item name="android:selectableItemBackground">@drawable/actionbar_item_background</item>
+        <item name="android:listSelector">@drawable/actionbar_item_background</item>
+    </style>
+
+    <style name="StreamActionButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:background">@color/orange_primary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="HelpEntry">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">@dimen/stream_border</item>
+        <item name="android:paddingBottom">@dimen/stream_border</item>
+        <item name="android:paddingLeft">@dimen/stream_border</item>
+        <item name="android:paddingRight">@dimen/stream_border</item>
+        <item name="android:textSize">@dimen/font_size_large</item>
     </style>
 
 </resources>

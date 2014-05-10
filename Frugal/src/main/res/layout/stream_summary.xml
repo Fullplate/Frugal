@@ -12,15 +12,14 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:paddingLeft="35dp"
-        android:textSize="@dimen/stream_fontsize_large"/>
+        android:textSize="@dimen/font_size_large"/>
 
     <TextView
         android:id="@+id/stream_header_amount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/stream_header_date"
-        android:paddingLeft="30dp"
-        android:textSize="@dimen/stream_fontsize_large"/>
+        android:paddingLeft="110dp"
+        android:textSize="@dimen/font_size_large"/>
 
 </RelativeLayout>

@@ -15,4 +15,8 @@
         android:title="@string/action_clear_data"
         android:showAsAction="never"/>
 
+    <item android:id="@+id/action_help"
+        android:title="@string/action_help"
+        android:showAsAction="never"/>
+
 </menu>

@@ -4,6 +4,7 @@
     <color name="orange_primary_selected">#D96200</color>
     <color name="orange_secondary">#FFBB33</color>
     <color name="stream_header_amount_exceeded">#e50000</color>
+    <color name="off_black">#3D3D3D</color>
     <color name="grey_medium">#666666</color>
     <color name="grey_light">#cccccc</color>
     <color name="grey_light2">#e6e6e6</color>

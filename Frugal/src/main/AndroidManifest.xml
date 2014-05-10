@@ -41,6 +41,17 @@
                 android:value=".view.StreamActivity" />
         </activity>
 
+        <activity
+            android:name=".view.HelpActivity"
+            android:label="@string/action_help"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".view.StreamActivity" >
+            <!-- Parent activity meta-data to support 4.0 -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".view.StreamActivity" />
+        </activity>
+
     </application>
 
 </manifest>

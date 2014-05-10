@@ -18,16 +18,22 @@
         android:background="@color/grey_light2">
 
         <TextView
-            android:id="@+id/activity_statistics_header"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="@dimen/stream_border"
-            android:paddingBottom="@dimen/stream_border"
-            android:layout_marginBottom="@dimen/statistics_spacing"
-            android:gravity="center_horizontal"
-            android:textSize="@dimen/font_size_xl"
+            style="@style/HelpEntry"
             android:textStyle="bold"
-            android:background="@color/orange_primary"/>
+            android:textSize="@dimen/font_size_xl"
+            android:text="@string/help_header"/>
+
+        <TextView
+            style="@style/HelpEntry"
+            android:text="@string/help_period"/>
+
+        <TextView
+            style="@style/HelpEntry"
+            android:text="@string/help_savings"/>
+
+        <TextView
+            style="@style/HelpEntry"
+            android:text="@string/help_food"/>
 
     </LinearLayout>
 </FrameLayout>

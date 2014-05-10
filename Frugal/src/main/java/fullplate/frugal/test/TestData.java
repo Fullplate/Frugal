@@ -8,7 +8,7 @@ import fullplate.frugal.domain.SingleEntry;
 
 public class TestData {
 
-    private static ArrayList<Entry> generateTestEntries() {
+    public static ArrayList<Entry> generateTestEntries() {
         long day = 86400000;
 
         ArrayList<Entry> entries = new ArrayList<>();
@@ -26,7 +26,7 @@ public class TestData {
         return entries;
     }
 
-    private static long generateTestStartTime() {
+    public static long generateTestStartTime() {
         return 1396310400000L; // 1st apr '14, midnight
     }
 

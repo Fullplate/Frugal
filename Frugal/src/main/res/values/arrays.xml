@@ -5,9 +5,35 @@
         <item name="1">Biweekly</item>
         <item name="2">Monthly</item>
     </string-array>
+
     <string-array name="periodValues">
         <item>0</item>
         <item>1</item>
         <item>2</item>
+    </string-array>
+
+    <string-array name="defaultDescriptions">
+        <item>Savings</item>
+        <item>Rent</item>
+        <item>Food</item>
+        <item>Groceries</item>
+        <item>Bills</item>
+        <item>Fuel</item>
+        <item>Public Transport</item>
+        <item>Insurance</item>
+        <item>Gas</item>
+        <item>Coffee</item>
+        <item>Breakfast</item>
+        <item>Lunch</item>
+        <item>Dinner</item>
+        <item>Drinks</item>
+    </string-array>
+
+    <string-array name="statisticsLabels">
+        <item>Average expenses, minus savings</item>
+        <item>Compared to your target</item>
+        <item>Average spent on food categories</item>
+        <item>Average savings</item>
+        <item>Savings to date</item>
     </string-array>
 </resources>

@@ -15,44 +15,33 @@
         android:paddingLeft="@dimen/stream_border"
         android:paddingRight="@dimen/stream_border"
         android:paddingTop="@dimen/stream_border"
-        android:paddingBottom="@dimen/stream_border">
+        android:paddingBottom="@dimen/stream_border"
+        android:background="@color/grey_medium">
 
         <TextView
             android:id="@+id/stream_actions_add_single"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:background="@color/orange_primary"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:text="@string/action_add_single_entry"/>
+            android:text="@string/action_add_single_entry"
+            style="@style/StreamActionButton"/>
 
         <TextView
             android:id="@+id/stream_actions_add_periodic"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:text="@string/action_add_periodic_entry"
             android:layout_marginLeft="@dimen/stream_border"
-            android:background="@color/orange_primary"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:text="@string/action_add_periodic_entry"/>
+            style="@style/StreamActionButton"/>
 
     </LinearLayout>
 
-    <ExpandableListView
-        android:id="@+id/stream_explistview"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="@dimen/stream_border"
-        android:paddingRight="@dimen/stream_border"/>
+        android:background="@color/grey_medium"
+        android:layout_marginLeft="@dimen/stream_border"
+        android:layout_marginRight="@dimen/stream_border">
+        <ExpandableListView
+            android:id="@+id/stream_explistview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/grey_light"/>
+    </FrameLayout>
 
 </LinearLayout>

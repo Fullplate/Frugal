@@ -3,4 +3,15 @@ Frugal
 
 An Android budgeting app.
 
-Note that this is a VERY work-in-progress version. Should compile, but may have errors, bugs, placeholder UI aspects etc.
+- create and delete one-off and regular expenses
+- view expenses in a stream, organised into weekly, biweekly or monthly sections
+- set a weekly, biweekly or monthly target
+- view statistics
+
+For future reference, contains examples of:
+
+- expandablelistview with viewholder pattern
+- alertdialog with edittext for input
+- proper up navigation, including ICS support and navigating up from an activity with multiple parents
+- DateTime and Calendar APIs
+- SQLite

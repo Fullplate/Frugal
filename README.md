@@ -3,6 +3,11 @@ Frugal
 
 An Android budgeting app.
 
+Published on the Google Play Store as 'Basic Budget':
+https://play.google.com/store/apps/details?id=fullplate.frugal
+
+Features include:
+
 - create and delete one-off and regular expenses
 - view expenses in a stream, organised into weekly, biweekly or monthly sections
 - set a weekly, biweekly or monthly target

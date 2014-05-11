@@ -75,7 +75,7 @@ public class StatisticsActivity extends Activity {
         for (PeriodSummary s : summaries) {
             totalAmount += s.getCurrentAmount();
         }
-        int averageAmount = (totalAmount - totalSavings) / summaries.size();
+        int averageAmount = totalAmount / summaries.size();
 
         // calculate average expenses in relation to target
         int targetDifference = service.getDefaultTarget() - averageAmount;

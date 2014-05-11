@@ -31,23 +31,13 @@ public class EntriesTableHandler {
         helper.close();
     }
 
-    // todo: probably don't need the query part
-    public Entry createEntry(Entry entry) {
+    public void createEntry(Entry entry) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COLUMN_TIMESTAMP, entry.getTimestamp());
         values.put(DatabaseHelper.COLUMN_AMOUNT, entry.getAmount());
         values.put(DatabaseHelper.COLUMN_DESCRIPTION, entry.getDescription());
 
-        long insertId = database.insert(DatabaseHelper.TABLE_ENTRIES, null, values);
-
-        Cursor cursor = database.query(DatabaseHelper.TABLE_ENTRIES, columns,
-                DatabaseHelper.COLUMN_TIMESTAMP + " = " + insertId, null, null, null, null);
-        cursor.moveToFirst();
-
-        Entry newEntry = cursorToEntry(cursor);
-        cursor.close();
-
-        return newEntry;
+        database.insert(DatabaseHelper.TABLE_ENTRIES, null, values);
     }
 
     public void deleteEntry(Entry entry) {

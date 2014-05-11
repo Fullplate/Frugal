@@ -7,8 +7,6 @@ import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    // todo: see 12. performance
-
     public static final String TABLE_ENTRIES = "entries";
     public static final String COLUMN_TIMESTAMP = "_timestamp";
     public static final String COLUMN_DESCRIPTION = "description";

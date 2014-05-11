@@ -40,13 +40,6 @@ import fullplate.frugal.services.DomainService;
 import fullplate.frugal.utilities.ArrayUtils;
 import fullplate.frugal.utilities.PixelUtils;
 
-/*
-TODO
-- ensure proguard is working (requires app signing first)
-- remove unused imports
-- remember to change .gitconfig
- */
-
 public class StreamActivity extends Activity {
 
     public static void updateStreamView(Activity activity) {

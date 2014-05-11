@@ -17,6 +17,7 @@ import java.util.TreeMap;
 import fullplate.frugal.database.EntriesTableHandler;
 import fullplate.frugal.domain.Entry;
 import fullplate.frugal.domain.PeriodSummary;
+import fullplate.frugal.test.TestData;
 
 /*
     This class provides an abstraction over the persistence layer.
@@ -47,8 +48,7 @@ public class DomainService {
         CalendarPeriod period = readPeriodPref(sharedPref);
         int defaultAmount = readDefaultTargetPref(sharedPref);
 
-        //summaryService = new DomainService(TestData.generateTestEntries(), TestData.generateTestStartTime(), period, defaultAmount);
-        summaryService = new DomainService(entries, startTime, period, defaultAmount); //todo
+        summaryService = new DomainService(entries, startTime, period, defaultAmount);
 
         summaryService.entriesTableHandler = entriesTableHandler;
         summaryService.sharedPref = sharedPref;
@@ -271,7 +271,9 @@ public class DomainService {
     private void calculateAmounts() {
         for (PeriodSummary summary : summaries.keySet()) {
             for (Entry entry : summaries.get(summary)) {
-                summary.increaseCurrentAmount(entry.getAmount());
+                if (!entry.getDescription().equals("Savings")) {
+                    summary.increaseCurrentAmount(entry.getAmount());
+                }
             }
         }
     }

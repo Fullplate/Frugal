@@ -11,8 +11,6 @@ import fullplate.frugal.domain.PeriodSummary;
 import fullplate.frugal.domain.SingleEntry;
 import fullplate.frugal.services.DomainService;
 
-// todo: this is probably failing because Calendar does not set time fields to 0
-
 @Deprecated
 public class DomainServiceTest extends TestCase {
 
